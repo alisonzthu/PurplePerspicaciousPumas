@@ -214,10 +214,10 @@ io.on('connection', (socket) => {
 
     // Send current chat messages to any socket in the room
     io.to('lobby').emit('chat updated', lobbyChatMessages, console.log('Lobby users: ', lobbyUsers));
-    io.to('lobby').emit('user joined lobby', lobbyUsers, console.log('it fired'));
+    io.to('lobby').emit('user joined lobby', lobbyUsers);
 
     getAllGames((games) => {
-      console.log('Sending games to individual socket');
+      console.log('Sending games to user');
       io.to(socket.id).emit('get games', {games: games})
     });
   });
@@ -244,7 +244,10 @@ io.on('connection', (socket) => {
 
   // CHATS
   socket.on('game chat', data => {
-    console.log('Game message received', data);
+    let gameName = data.gameName;
+    let chat = Games[gameName].chat;
+    chat.push(data);
+    io.to(gameName).emit('game chat updated', chat);
   })
 
   // GAMES
@@ -272,6 +275,14 @@ io.on('connection', (socket) => {
       var { players, gameStage } = game.value;
       console.log('DATA!', players.length, gameStage);
 
+      Games[gameName] = {
+        time: null,
+        timer: null,
+        chat: []
+      }
+
+      io.to(gameName).emit('game chat updated', Games[gameName].chat);
+
       if (players.length === 4 && gameStage === 'waiting') {
         queries.setGameInstanceGameStageToPlaying(gameName)
           .then(game => {
@@ -285,11 +296,6 @@ io.on('connection', (socket) => {
 /*************************************************************
 LOGIC TO CREATE COUNTDOWN BEFORE GAME STARTS
 **************************************************************/
-            Games[gameName] = {
-              time: null,
-              timer: null,
-              chat: []
-            }
             Games[gameName].time = 5;
             Games[gameName].timer = setInterval( () => {
               io.to(gameName).emit('timer',{time: Games[gameName].time--})

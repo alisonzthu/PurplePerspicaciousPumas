@@ -5,7 +5,7 @@ import PlayingGame from './PlayingGame.jsx';
 import EndOfGame from './EndOfGame.jsx';
 import $ from 'jquery';
 import io from 'socket.io-client';
-import { PageHeader, Panel, ListGroup, ListGroupItem } from 'react-bootstrap';
+import { Col, PageHeader, Panel, ListGroup, ListGroupItem } from 'react-bootstrap';
 
 class Game extends React.Component {
   constructor(props) {
@@ -14,6 +14,7 @@ class Game extends React.Component {
       game: null,
       username: null,
       time: null,
+      gameChat: [],
       value: ''
     };
 
@@ -66,6 +67,12 @@ class Game extends React.Component {
 
     this.props.route.ioSocket.on('timer', (data) => {
       this.setState({time: data.time})
+    })
+
+    this.props.route.ioSocket.on('game chat updated', data => {
+      console.log('Chat room data', data);
+      this.setState({gameChat: data});
+      console.log('Current chat', this.state.gameChat);
     })
 
   }
@@ -125,7 +132,7 @@ class Game extends React.Component {
   }
 
   sendMessageToChatroom(message) {
-    this.props.route.ioSocket.emit('game chat', {gameName: this.state.game.gameName, message: message, username: this.state.username});
+    this.props.route.ioSocket.emit('game chat', {gameName: this.props.params.gamename, message: message, username: this.state.username});
     this.setState({value: ''});
   }
 
@@ -153,12 +160,18 @@ class Game extends React.Component {
   render() {
     return (
       <div id="game">
-        {this.state.game && this.state.username && this.state.game.gameStage === 'waiting' && <WaitingRoom game={this.state.game} time={this.state.time} user={this.state.username} sendToLobby={this.props.route.sendToLobby} leaveGame={this.leaveGame} />}
-        {this.state.game && this.state.username && this.state.game.gameStage === 'playing' && <PlayingGame game={this.state.game} time={this.state.time} user={this.state.username} handleResponse={this.handleResponse} handlePromptSubmission={this.handlePromptSubmission} handleJudgeSelection={this.handleJudgeSelection} handleReadyToMoveOn={this.handleReadyToMoveOn}/>}
-        {this.state.game && this.state.username && this.state.game.gameStage === 'gameover' && <EndOfGame game={this.state.game} sendToLobby={this.props.route.sendToLobby}/>}
-
-        <input placeholder="Type here..." value={this.state.value} onChange={this.handleMessageChange}/>
-        <button onClick={() => this.sendMessageToChatroom(this.state.value)}>Send</button>
+        <Col sm={6} smOffset={3}>
+          {this.state.game && this.state.username && this.state.game.gameStage === 'waiting' && <WaitingRoom game={this.state.game} time={this.state.time} user={this.state.username} sendToLobby={this.props.route.sendToLobby} leaveGame={this.leaveGame} />}
+          {this.state.game && this.state.username && this.state.game.gameStage === 'playing' && <PlayingGame game={this.state.game} time={this.state.time} user={this.state.username} handleResponse={this.handleResponse} handlePromptSubmission={this.handlePromptSubmission} handleJudgeSelection={this.handleJudgeSelection} handleReadyToMoveOn={this.handleReadyToMoveOn}/>}
+          {this.state.game && this.state.username && this.state.game.gameStage === 'gameover' && <EndOfGame game={this.state.game} sendToLobby={this.props.route.sendToLobby}/>}
+        </Col>
+        <Col sm={6} smOffset={3}>
+          <input placeholder="Type here..." value={this.state.value} onChange={this.handleMessageChange}/>
+          <button onClick={() => this.sendMessageToChatroom(this.state.value)}>Send</button>
+          <Panel header="Game Chat" bsStyle="primary">
+            {this.state.gameChat.map(message => <p>{message.username}: {message.message}</p>)}
+          </Panel>
+        </Col>
       </div>
     )
   }
