@@ -173,7 +173,6 @@ class Lobby extends React.Component {
       method: 'GET',
       headers: {'content-type': 'application/json'},
       success: data => {
-        console.log('handleLogout data: ', data);
         logoutFunc();
       },
       error: (err) => {
