@@ -7,6 +7,7 @@ var LocalStrategy = require('passport-local').Strategy;
 var cookieParser = require('cookie-parser');
 var session = require('express-session');
 var queries = require('../db/db-queries.js');
+var UserQueries = require('../db/db-usermodels-queries.js');
 var helpers = require('./helpers.js');
 
 var User = models.userModel;
