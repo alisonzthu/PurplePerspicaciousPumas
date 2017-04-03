@@ -13,11 +13,14 @@ const ioSocket = io();
 class App extends Component {
   constructor(props){
     super(props);
-    this.state = {}
+    this.state = {
+      isLoggedIn: false
+    };
 
     this.sendToGame = this.sendToGame.bind(this);
     this.sendToLobby = this.sendToLobby.bind(this);
     this.sendToHomePage = this.sendToHomePage.bind(this);
+    this.toggleLoggedIn = this.toggleLoggedIn.bind(this);
   }
 
   sendToLobby(disconnectTimeOut) {
@@ -34,15 +37,22 @@ class App extends Component {
     hashHistory.push('/');
   }
 
+  toggleLoggedIn() {
+    this.setState(prevState => ({loggedIn : !prevState.loggedIn}));
+    console.log('loggedIn value now: ', this.state.loggedIn);
+  }
+
   render() {
     return (
       <div>
         <Router history={hashHistory}>
           <Route path="/"
-            component={Home}
+            component={() => <Home toggleLoggedIn={this.toggleLoggedIn} sendToLobby={this.sendToLobby}/>}
             sendToLobby={this.sendToLobby}
-            handleSignUp={this.handleSignUp}
-            handleLogIn={this.handleLogIn} />
+            // loggedIn={this.state.isLoggedIn}
+            // handleSignUp={this.handleSignUp}
+            // handleLogIn={this.handleLogIn}
+             />
           <Route path="/lobby"
             component={Lobby}
             ioSocket={ioSocket}

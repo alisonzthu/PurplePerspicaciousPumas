@@ -31,6 +31,7 @@ class LogIn extends React.Component {
   }
 
   handleLogInAttempt(username, password) {
+    let context = this;
     $.ajax({
       url: '/login',
       method: 'POST',
@@ -38,6 +39,8 @@ class LogIn extends React.Component {
       data: JSON.stringify({'username': username, 'password': password}),
       success: () => {
         this.props.sendToLobby();
+        console.log('context: ', context.props);
+        this.props.toggleLoggedIn();
       },
       error: (err) => {
         this.setState({error: true});

@@ -14,8 +14,8 @@ const Home = (props) => (
       <GameDescription />
     </Col>
     <Col sm={4} smOffset={4}>
-    <SignUp sendToLobby={props.route.sendToLobby}/>
-    <LogIn sendToLobby={props.route.sendToLobby} />
+    <SignUp sendToLobby={props.sendToLobby} />
+    <LogIn sendToLobby={props.sendToLobby} toggleLoggedIn={props.toggleLoggedIn}/>
     </Col>
   </Col>
 )
